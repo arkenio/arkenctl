@@ -12,6 +12,6 @@ deploy:
   skip_cleanup: true
   access_key_id: AKIAIB2SVB7S6ZENR7DA
   secret_access_key:
-    secure: VIt+VhJUcI+zmyzhnpIcf0l4IRNixsXOiPV2WKazjrkxxogwO14M4WkW348Uv0xdG2LdPKEVf0S8EKV46oItv3S+0pmcaxn6TUd/OPeGu+mi2EeUzhvl99Wuh/uGiKst1bICeTaJqio28WHeA/yerglELlYf1mC4IHWeJN+KFV0=
+    secure: LFaBtlKL6bs+cKxUWIrIC2Z9KhVyCBz6/2LFnD/wIaayDv4pcCIFJ9j4wsAPF8jGuaOrAzdZJ1ZjZtTRGNIpumwln2c6rf4jJ9xQ7NdKIgdtod6DCUYds5JqALYOb+lQhkbmQNCX7M82Pzg4dqXlxcdguwr+GwYED+p/OnACbRg=
   bucket: gogeta
   local-dir: bin
