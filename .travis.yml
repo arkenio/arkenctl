@@ -10,8 +10,8 @@ script:
 deploy:
   provider: s3
   skip_cleanup: true
-  access_key_id: AKIAIB2SVB7S6ZENR7DA
+  access_key_id: AKIAIUJMCCUP5PWE2AOA
   secret_access_key:
-    secure: LFaBtlKL6bs+cKxUWIrIC2Z9KhVyCBz6/2LFnD/wIaayDv4pcCIFJ9j4wsAPF8jGuaOrAzdZJ1ZjZtTRGNIpumwln2c6rf4jJ9xQ7NdKIgdtod6DCUYds5JqALYOb+lQhkbmQNCX7M82Pzg4dqXlxcdguwr+GwYED+p/OnACbRg=
+    secure: U8IsieNVV+2nctq+Qe6C/RU21R2hCosQnItJNmuFyWT7iD2ALBQcF50CIPhf4KAFi1XX6G90IdsBXkZfDo197MoDEJy7FivXyXTd+kPSQS160iFgAvaSWeg+CcaD3eJJBsNgAyKh9vrE0woSnMxLqwp53oMt+APdri5SXVmawaY=
   bucket: gogeta
   local-dir: bin
