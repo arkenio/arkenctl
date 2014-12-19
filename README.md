@@ -20,6 +20,8 @@ arkenctl can watch if the cluster is healthy. If something goes wrong, then it g
 
 	# arkenctl service list [-status passivated]
 
+	## Shows informations about nxio_00101 
+	# arkenctl service cat nxio_00001
 
 ## Report & Contribute
 
