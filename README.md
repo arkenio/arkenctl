@@ -18,10 +18,27 @@ arkenctl can watch if the cluster is healthy. If something goes wrong, then it g
 	
 ### Services introspection
 
-	# arkenctl service list [-status passivated]
-
+	# arkenctl service list -status passivated
+	Name			Index	Domain					Status		LastAccess
+    ----			-----	------					------		----------
+	nxio_000001		1	testenv-nuxeo.test.io.nuxeo.com		passivated	2014-12-09 07:51:01 +0000 UTC
+	nxio_000002		1	test2-nuxeo.test.io.nuxeo.com		passivated	2014-12-08 18:10:01 +0000 UTC
+	nxio_000003		1	test3-nuxeo.test.io.nuxeo.com		passivated	2014-12-08 18:09:51 +0000 UTC
+	
 	## Shows informations about nxio_00101 
 	# arkenctl service cat nxio_00001
+	===========================================
+    Node index : 1
+    Name : nxio_000001
+    UnitName : nxio@000001.service
+    Etcd key : /services/nxio_000001/1
+    Domain name : testenv-nuxeo.test.io.nuxeo.com
+    Location : 172.32.46.78:49160
+    LastAccess: 2014-12-09 07:51:01 +0000 UTC
+    Status: passivated
+      * expected : passivated
+      * current : stopped
+      * alive :
 
 ## Report & Contribute
 
