@@ -51,10 +51,10 @@ func (cw *ClusterWatcher) check(cluster *ServiceCluster) error {
 			case "notfound", STARTING_STATUS, PASSIVATED_STATUS, STOPPED_STATUS, STOPPING_STATUS:
 				break
 			default:
-				cw.addInError(cluster)
+				cw.addInError(cluster, stError)
 			}
 		} else {
-			cw.addInError(cluster)
+			cw.addInError(cluster, err)
 		}
 		return err
 	}
@@ -63,11 +63,11 @@ func (cw *ClusterWatcher) check(cluster *ServiceCluster) error {
 
 }
 
-func (cw *ClusterWatcher) addInError(cluster *ServiceCluster) {
+func (cw *ClusterWatcher) addInError(cluster *ServiceCluster, err error) {
 	if _, ok := cw.inError[cluster.Name]; ok {
-		glog.Errorf("Cluster %s is still in error", cluster.Name)
+		glog.Errorf("Cluster %s is still in error, computedStatus : %v", cluster.Name, err)
 	} else {
-		glog.Errorf("Cluster %s is in error", cluster.Name)
+		glog.Errorf("Cluster %s is in error : %v ", cluster.Name, err)
 		cw.inError[cluster.Name] = cluster
 	}
 }
