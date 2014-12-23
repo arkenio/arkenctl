@@ -3,6 +3,7 @@
 *.a
 *.so
 .project
+arkenctl
 # Folders
 _obj
 _test

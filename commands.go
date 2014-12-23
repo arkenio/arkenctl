@@ -59,6 +59,11 @@ func GetCommands(stop chan interface{}) []cli.Command {
 							Value: "",
 							Usage: "Show only services in the given status",
 						},
+						cli.StringFlag{
+							Name:  "template",
+							Value: "",
+							Usage: "template to use to render the output",
+						},
 					},
 				},
 				{
@@ -66,6 +71,14 @@ func GetCommands(stop chan interface{}) []cli.Command {
 					Usage: "Get the infos for a service",
 					Action: func(c *cli.Context) {
 						NewServiceInfoCommand(c)(stop)
+					},
+					Flags: []cli.Flag{
+
+						cli.StringFlag{
+							Name:  "template",
+							Value: "",
+							Usage: "template to use to render the output",
+						},
 					},
 				},
 				{
