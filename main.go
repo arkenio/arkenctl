@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"github.com/arkenio/goarken"
 	"github.com/codegangsta/cli"
 	"github.com/golang/glog"
@@ -30,6 +31,7 @@ func main() {
 	app.Version = version
 	app.Flags = GetGlobalFlags()
 	app.Commands = GetCommands(stopBroadcaster.Listen())
+	flag.Parse()
 	app.Run(os.Args)
 }
 

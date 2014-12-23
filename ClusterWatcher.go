@@ -48,10 +48,13 @@ func (cw *ClusterWatcher) check(cluster *ServiceCluster) error {
 	if err != nil {
 		if stError, ok := err.(StatusError); ok {
 			switch stError.ComputedStatus {
-			case "notfound", STARTING_STATUS, PASSIVATED_STATUS, STOPPED_STATUS, STOPPING_STATUS:
+			case STARTING_STATUS, PASSIVATED_STATUS, STOPPED_STATUS, STOPPING_STATUS:
 				break
 			default:
-				cw.addInError(cluster, stError)
+				// If status is nil, then we can't say it's an error... it's in an unknown status
+				if stError.Status != nil {
+					cw.addInError(cluster, stError)
+				}
 			}
 		} else {
 			cw.addInError(cluster, err)

@@ -27,6 +27,10 @@ func GetGlobalFlags() []cli.Flag {
 			Value: "/services",
 			Usage: "etcd prefix to get services",
 		},
+		cli.BoolFlag{
+			Name:  "logtostderr",
+			Usage: "log to stderr instead of files",
+		},
 	}
 	return flags
 }

@@ -1,0 +1,8 @@
+nxio_001538 error /services/nxio_001538/1 C: E:stopped
+nxio_000472 error /services/nxio_000472/1 C: E:stopped
+nxio_002794 error /services/nxio_002794/1 C:stopped E:started
+nxio_002077 error /services/nxio_002077/1 C: E:stopped
+nxio_000959 error /services/nxio_000959/1 C: E:stopped
+nxio_001405 error /services/nxio_001405/1 C: E:stopped
+nxio_001191 error /services/nxio_001191/1 C: E:stopped
+nxio_002691 error /services/nxio_002691/1 C: E:stopped
