@@ -7,4 +7,4 @@ WORKDIR /usr/local/go/src/github.com/arkenio/arkenctl
 RUN gom install
 RUN gom test
 
-ENTRYPOINT ["arkenctl", "--etcdAddress", "http://172.17.42.1:4001", "--logtostderr=true"]
+ENTRYPOINT ["arkenctl", "--etcdAddress", "http://172.17.42.1:4001", "--logtostderr"]
