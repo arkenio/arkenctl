@@ -45,9 +45,10 @@ func GetCommands(stop chan interface{}) []cli.Command {
 			Flags: []cli.Flag{
 
 				cli.StringFlag{
-					Name:  "datadogApiKey",
-					Value: "",
-					Usage: "The datadog API key, if set, metrics are sent to datadog",
+					Name:   "datadogApiKey",
+					Value:  "",
+					Usage:  "The datadog API key, if set, metrics are sent to datadog",
+					EnvVar: "DD_API_KEY",
 				},
 			},
 			Action: func(c *cli.Context) {
