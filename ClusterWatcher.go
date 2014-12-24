@@ -74,8 +74,9 @@ func (cw *ClusterWatcher) updateMetrics() {
 					} else {
 						errors++
 					}
+				} else {
+					started++
 				}
-				started++
 			}
 
 			cw.errorsGauge.Update(errors)
