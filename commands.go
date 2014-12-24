@@ -32,6 +32,7 @@ func GetGlobalFlags() []cli.Flag {
 			Usage: "log to stderr instead of files",
 		},
 	}
+
 	return flags
 }
 

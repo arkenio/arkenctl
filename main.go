@@ -18,8 +18,6 @@ const (
 
 func main() {
 
-	glog.Infof("%s starting", progname)
-
 	//c := parseConfig()
 	//handleSignals(c)
 
@@ -31,7 +29,13 @@ func main() {
 	app.Version = version
 	app.Flags = GetGlobalFlags()
 	app.Commands = GetCommands(stopBroadcaster.Listen())
+
+	// Hack to be able to use flag for glog
+	flag.CommandLine.Init(os.Args[0], flag.ContinueOnError)
+	flag.Usage = func() {}
 	flag.Parse()
+
+	glog.Infof("%s starting", progname)
 	app.Run(os.Args)
 }
 
