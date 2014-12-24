@@ -4,16 +4,90 @@ import (
 	. "github.com/arkenio/goarken"
 	"github.com/coreos/go-etcd/etcd"
 	"github.com/golang/glog"
+	metrics "github.com/rcrowley/go-metrics"
+	datadog "github.com/vistarmedia/go-datadog"
+	"os"
+	"time"
 )
 
 type ClusterWatcher struct {
-	Watcher   *Watcher
-	Client    *etcd.Client
-	SingleRun bool
-	inError   map[string]*ServiceCluster
+	Watcher       *Watcher
+	Client        *etcd.Client
+	SingleRun     bool
+	DataDogAPIKey string
+
+	inError map[string]*ServiceCluster
+
+	errorsGauge     metrics.Gauge
+	startedGauge    metrics.Gauge
+	passivatedGauge metrics.Gauge
 }
 
 func (cw *ClusterWatcher) Watch(stop chan interface{}) error {
+
+	if cw.DataDogAPIKey != "" {
+		cw.errorsGauge = metrics.NewGauge()
+		cw.startedGauge = metrics.NewGauge()
+		cw.passivatedGauge = metrics.NewGauge()
+
+		metrics.Register("arken.environments.stats.errors", cw.errorsGauge)
+		metrics.Register("arken.environments.stats.started", cw.startedGauge)
+		metrics.Register("arken.environments.stats.passivated", cw.passivatedGauge)
+
+		host, _ := os.Hostname()
+		dog := datadog.New(host, cw.DataDogAPIKey)
+		go dog.DefaultReporter().Start(60 * time.Second)
+
+	}
+
+	go cw.updateMetrics()
+
+	return cw.watchServiceKeys(stop)
+
+}
+
+func (cw *ClusterWatcher) updateMetrics() {
+	interval := time.Minute
+	ticker := time.NewTicker(interval)
+
+	for {
+		select {
+		case <-ticker.C:
+			errors := int64(0)
+			passivated := int64(0)
+			started := int64(0)
+			for _, cluster := range cw.Watcher.Services {
+				_, err := cw.Watcher.Services[cluster.Name].Next()
+				if err != nil {
+					if stError, ok := err.(StatusError); ok {
+						switch stError.ComputedStatus {
+						case PASSIVATED_STATUS:
+							passivated++
+						case STARTING_STATUS, STOPPED_STATUS, STOPPING_STATUS:
+							break
+						default:
+							// If status is nil, then we can't say it's an error... it's in an unknown status
+							if stError.Status != nil {
+								errors++
+							}
+						}
+					} else {
+						errors++
+					}
+				}
+				started++
+			}
+
+			cw.errorsGauge.Update(errors)
+			cw.passivatedGauge.Update(passivated)
+			cw.startedGauge.Update(started)
+
+			ticker = time.NewTicker(interval)
+		}
+	}
+}
+
+func (cw *ClusterWatcher) watchServiceKeys(stop chan interface{}) error {
 	cw.inError = make(map[string]*ServiceCluster)
 
 	// First check that no instance has to be passivated

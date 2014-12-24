@@ -42,7 +42,14 @@ func GetCommands(stop chan interface{}) []cli.Command {
 		{
 			Name:  "watch",
 			Usage: "Watch the cluster for inconsistency and log errors",
-			Flags: GetGlobalFlags(),
+			Flags: []cli.Flag{
+
+				cli.StringFlag{
+					Name:  "datadogApiKey",
+					Value: "",
+					Usage: "The datadog API key, if set, metrics are sent to datadog",
+				},
+			},
 			Action: func(c *cli.Context) {
 				NewClusterWatcher(c)(stop)
 			},
@@ -156,9 +163,10 @@ func NewClusterWatcher(c *cli.Context) Runnable {
 	w := CreateWatcherFromCli(c, client)
 
 	cw := &ClusterWatcher{
-		Watcher:   w,
-		Client:    client,
-		SingleRun: c.Bool("single"),
+		Watcher:       w,
+		Client:        client,
+		SingleRun:     c.Bool("single"),
+		DataDogAPIKey: c.String("datadogApiKey"),
 	}
 	return cw.Watch
 }
