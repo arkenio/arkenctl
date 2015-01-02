@@ -21,12 +21,7 @@ type ServiceCommand struct {
 func (sc *ServiceCommand) getServiceCluster() (*ServiceCluster, error) {
 	if len(sc.Cli.Args()) > 0 {
 		serviceName := sc.Cli.Args()[0]
-		if cluster, ok := sc.Watcher.Services[serviceName]; ok {
-			return cluster, nil
-		} else {
-			return nil, errors.New("Service not foudn")
-		}
-
+		return GetServiceClusterFromPath("/service/"+serviceName, sc.Client)
 	} else {
 		return nil, errors.New("You must pass the service name as an argument")
 	}
@@ -92,7 +87,7 @@ func (sc *ServiceCommand) Start(stop chan interface{}) error {
 	}
 
 	for _, service := range cluster.GetInstances() {
-		err = service.Start()
+		err = service.Start(sc.Client)
 		if err != nil {
 			break
 		}
@@ -108,7 +103,7 @@ func (sc *ServiceCommand) Stop(stop chan interface{}) error {
 	}
 
 	for _, service := range cluster.GetInstances() {
-		err = service.Stop()
+		err = service.Stop(sc.Client)
 		if err != nil {
 			break
 		}
@@ -124,7 +119,7 @@ func (sc *ServiceCommand) Passivate(stop chan interface{}) error {
 	}
 
 	for _, service := range cluster.GetInstances() {
-		err = service.Passivate()
+		err = service.Passivate(sc.Client)
 		if err != nil {
 			break
 		}
