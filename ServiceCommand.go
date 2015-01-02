@@ -74,10 +74,10 @@ func (sc *ServiceCommand) List(stop chan interface{}) error {
 func (sc *ServiceCommand) Cat(stop chan interface{}) error {
 	cluster, err := sc.getServiceCluster()
 	if err != nil {
-		println(err.Error())
 		return err
 	} else {
-		sc.renderService(cluster)
+		tpl := sc.Cli.String("template")
+		renderService(cluster, tpl)
 	}
 	return nil
 }
@@ -130,9 +130,7 @@ func (sc *ServiceCommand) Passivate(stop chan interface{}) error {
 	return err
 }
 
-func (sc *ServiceCommand) renderService(cluster *ServiceCluster) {
-	tpl := sc.Cli.String("template")
-
+func renderService(cluster *ServiceCluster, tpl string) {
 	if tpl == "" {
 
 		tpl = `{{range $index, $service := .GetInstances }}===========================================

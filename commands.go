@@ -136,6 +136,27 @@ func GetCommands(stop chan interface{}) []cli.Command {
 						NewDomainInfoCommand(c)(stop)
 					},
 				},
+				{
+					Name:  "start",
+					Usage: "Starts the service associated to the domain",
+					Action: func(c *cli.Context) {
+						NewDomainStartCommand(c)(stop)
+					},
+				},
+				{
+					Name:  "stop",
+					Usage: "Watch the cluster for inconsistency and log errors",
+					Action: func(c *cli.Context) {
+						NewDomainStopCommand(c)(stop)
+					},
+				},
+				{
+					Name:  "passivate",
+					Usage: "Watch the cluster for inconsistency and log errors",
+					Action: func(c *cli.Context) {
+						NewDomainPassivateCommand(c)(stop)
+					},
+				},
 			},
 		},
 	}
@@ -220,9 +241,43 @@ func NewServicePassivateCommand(c *cli.Context) Runnable {
 }
 
 func NewDomainListCommand(c *cli.Context) Runnable {
-	return (&NotImplementedCommand{}).Run
+	client := CreateEtcdClientFromCli(c)
+	w := CreateWatcherFromCli(c, client)
+
+	dc := &DomainCommand{
+		Client:  client,
+		Cli:     c,
+		Watcher: w,
+	}
+
+	return dc.List
+}
+
+func NewDomainCommand(c *cli.Context) *DomainCommand {
+	goarken.SetDomainPrefix(c.GlobalString("domainDir"))
+	goarken.SetServicePrefix(c.GlobalString("serviceDir"))
+
+	dc := &DomainCommand{
+		Client: CreateEtcdClientFromCli(c),
+		Cli:    c,
+	}
+
+	return dc
 }
 
 func NewDomainInfoCommand(c *cli.Context) Runnable {
-	return (&NotImplementedCommand{}).Run
+	return NewDomainCommand(c).Cat
+
+}
+
+func NewDomainStartCommand(c *cli.Context) Runnable {
+	return NewDomainCommand(c).Start
+}
+
+func NewDomainStopCommand(c *cli.Context) Runnable {
+	return NewDomainCommand(c).Stop
+}
+
+func NewDomainPassivateCommand(c *cli.Context) Runnable {
+	return NewDomainCommand(c).Passivate
 }
