@@ -145,14 +145,14 @@ func GetCommands(stop chan interface{}) []cli.Command {
 				},
 				{
 					Name:  "stop",
-					Usage: "Watch the cluster for inconsistency and log errors",
+					Usage: "Stop the service associated to the domain",
 					Action: func(c *cli.Context) {
 						NewDomainStopCommand(c)(stop)
 					},
 				},
 				{
 					Name:  "passivate",
-					Usage: "Watch the cluster for inconsistency and log errors",
+					Usage: "Passivate the service associated to the domain",
 					Action: func(c *cli.Context) {
 						NewDomainPassivateCommand(c)(stop)
 					},

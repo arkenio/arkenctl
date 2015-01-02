@@ -18,9 +18,6 @@ const (
 
 func main() {
 
-	//c := parseConfig()
-	//handleSignals(c)
-
 	stopBroadcaster := goarken.NewBroadcaster()
 
 	app := cli.NewApp()
@@ -39,7 +36,7 @@ func main() {
 	app.Run(os.Args)
 }
 
-func handleSignals(config *Config) {
+func handleSignals() {
 	signals := make(chan os.Signal)
 	signal.Notify(signals, os.Interrupt, syscall.SIGTERM)
 	signal.Notify(signals, os.Interrupt, syscall.SIGUSR1)
@@ -65,7 +62,7 @@ func handleSignals(config *Config) {
 				pprof.Lookup("goroutine").WriteTo(os.Stdout, 2)
 			case syscall.SIGUSR2:
 				if !isProfiling {
-					f, err := os.Create(config.cpuProfile)
+					f, err := os.Create("/tmp/arkenctl.profile")
 					if err != nil {
 						glog.Fatal(err)
 					} else {
