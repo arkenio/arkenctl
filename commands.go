@@ -179,19 +179,28 @@ func (ni *NotImplementedCommand) Run(stop chan interface{}) error {
 }
 
 func CreateServiceCommand(c *cli.Context) *ServiceCommand {
-	client := CreateEtcdClientFromCli(c)
-	w := CreateWatcherFromCli(c, client)
+
+	goarken.SetDomainPrefix(c.GlobalString("domainDir"))
+	goarken.SetServicePrefix(c.GlobalString("serviceDir"))
 
 	return &ServiceCommand{
-		Watcher: w,
-		Client:  CreateEtcdClientFromCli(c),
-		Cli:     c,
+		Client: CreateEtcdClientFromCli(c),
+		Cli:    c,
 	}
 
 }
 
 func NewServiceListCommand(c *cli.Context) Runnable {
-	return CreateServiceCommand(c).List
+	client := CreateEtcdClientFromCli(c)
+	w := CreateWatcherFromCli(c, client)
+	sc := &ServiceCommand{
+		Watcher: w,
+		Client:  CreateEtcdClientFromCli(c),
+		Cli:     c,
+	}
+
+	return sc.List
+
 }
 
 func NewServiceInfoCommand(c *cli.Context) Runnable {

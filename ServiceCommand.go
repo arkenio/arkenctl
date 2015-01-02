@@ -21,7 +21,8 @@ type ServiceCommand struct {
 func (sc *ServiceCommand) getServiceCluster() (*ServiceCluster, error) {
 	if len(sc.Cli.Args()) > 0 {
 		serviceName := sc.Cli.Args()[0]
-		return GetServiceClusterFromPath("/service/"+serviceName, sc.Client)
+		path := sc.Cli.GlobalString("serviceDir") + "/" + serviceName
+		return GetServiceClusterFromPath(path, sc.Client)
 	} else {
 		return nil, errors.New("You must pass the service name as an argument")
 	}
@@ -73,6 +74,7 @@ func (sc *ServiceCommand) List(stop chan interface{}) error {
 func (sc *ServiceCommand) Cat(stop chan interface{}) error {
 	cluster, err := sc.getServiceCluster()
 	if err != nil {
+		println(err.Error())
 		return err
 	} else {
 		sc.renderService(cluster)
