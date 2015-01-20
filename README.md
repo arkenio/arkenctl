@@ -40,6 +40,33 @@ arkenctl can watch if the cluster is healthy. If something goes wrong, then it g
       * current : stopped
       * alive :
 
+### Command templating
+
+The `service list` command may take a `--template` parameter that allows to specify the template used 
+to render a service's line. It is based Go template and you can issue commande like this :
+
+    arkenctl service list --template "Domain : {{.Domain}} Service: {{.Name}}"
+
+The context used for the templating is the Service context, meaning that you have access to all the 
+public property of the Service object :
+
+
+    Service
+        Index
+        NodeKey
+        UnitName
+        Location
+            Host
+            Port
+        Domain
+        Name
+        Status
+            Expected
+            Current
+            Alive
+        LastAccess
+
+
 ## Report & Contribute
 
 
