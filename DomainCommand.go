@@ -1,7 +1,6 @@
 package main
 
 import (
-	//	"errors"
 	"errors"
 	"fmt"
 	. "github.com/arkenio/goarken"
@@ -59,7 +58,7 @@ func (dc *DomainCommand) Cat(stop chan interface{}) error {
 	if domain.Typ == "service" {
 		path := dc.Cli.GlobalString("serviceDir") + "/" + domain.Value
 		service, _ := GetServiceClusterFromPath(path, dc.Client)
-		renderService(service, "")
+		renderService(service, "", os.Stdout)
 	} else {
 		fmt.Printf("Redirecting to : %s", domain.Value)
 	}

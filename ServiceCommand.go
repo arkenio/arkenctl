@@ -6,6 +6,7 @@ import (
 	. "github.com/arkenio/goarken"
 	"github.com/codegangsta/cli"
 	"github.com/coreos/go-etcd/etcd"
+	"io"
 	"os"
 	"strings"
 	"text/tabwriter"
@@ -77,7 +78,7 @@ func (sc *ServiceCommand) Cat(stop chan interface{}) error {
 		return err
 	} else {
 		tpl := sc.Cli.String("template")
-		renderService(cluster, tpl)
+		renderService(cluster, tpl, os.Stdout)
 	}
 	return nil
 }
@@ -130,7 +131,7 @@ func (sc *ServiceCommand) Passivate(stop chan interface{}) error {
 	return err
 }
 
-func renderService(cluster *ServiceCluster, tpl string) {
+func renderService(cluster *ServiceCluster, tpl string, wr io.Writer) {
 	if tpl == "" {
 
 		tpl = `{{range $index, $service := .GetInstances }}===========================================
@@ -150,5 +151,5 @@ func renderService(cluster *ServiceCluster, tpl string) {
 	}
 
 	t := template.Must(template.New("service").Parse(tpl))
-	t.Execute(os.Stdout, cluster)
+	t.Execute(wr, cluster)
 }

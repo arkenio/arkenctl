@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	. "github.com/arkenio/goarken"
 	"github.com/coreos/go-etcd/etcd"
 	"github.com/golang/glog"
@@ -148,13 +149,17 @@ func (cw *ClusterWatcher) addInError(cluster *ServiceCluster, err error) {
 		glog.Errorf("Cluster %s is in error : %v ", cluster.Name, err)
 		cw.inError[cluster.Name] = cluster
 	}
-	glog.Errorf(renderService(cluster, ""))
+	var doc bytes.Buffer
+	renderService(cluster, "", &doc)
+	glog.Errorf(doc.String())
 }
 
 func (cw *ClusterWatcher) removeInError(cluster *ServiceCluster) {
 	if _, ok := cw.inError[cluster.Name]; ok {
 		glog.Infof("Cluster %s is back to a stable state", cluster.Name)
-		glog.Errorf(renderService(cluster, ""))
+		var doc bytes.Buffer
+		renderService(cluster, "", &doc)
+		glog.Errorf(doc.String())
 		delete(cw.inError, cluster.Name)
 	}
 }
