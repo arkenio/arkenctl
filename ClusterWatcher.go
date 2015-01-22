@@ -148,11 +148,13 @@ func (cw *ClusterWatcher) addInError(cluster *ServiceCluster, err error) {
 		glog.Errorf("Cluster %s is in error : %v ", cluster.Name, err)
 		cw.inError[cluster.Name] = cluster
 	}
+	glog.Errorf(renderService(cluster, ""))
 }
 
 func (cw *ClusterWatcher) removeInError(cluster *ServiceCluster) {
 	if _, ok := cw.inError[cluster.Name]; ok {
 		glog.Infof("Cluster %s is back to a stable state", cluster.Name)
+		glog.Errorf(renderService(cluster, ""))
 		delete(cw.inError, cluster.Name)
 	}
 }
