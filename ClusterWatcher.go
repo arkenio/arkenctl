@@ -37,7 +37,7 @@ func (cw *ClusterWatcher) Watch(stop chan interface{}) error {
 
 		host, _ := os.Hostname()
 		dog := datadog.New(host, cw.DataDogAPIKey)
-		go dog.DefaultReporter().Start(60 * time.Second)
+		go dog.DefaultReporter().Start(30 * time.Second)
 
 	}
 
@@ -48,7 +48,7 @@ func (cw *ClusterWatcher) Watch(stop chan interface{}) error {
 }
 
 func (cw *ClusterWatcher) updateMetrics() {
-	interval := time.Minute
+	interval := 30 * time.Second
 	ticker := time.NewTicker(interval)
 
 	for {
@@ -57,6 +57,7 @@ func (cw *ClusterWatcher) updateMetrics() {
 			errors := int64(0)
 			passivated := int64(0)
 			started := int64(0)
+			glog.Infof("Updating metrics...")
 			for _, cluster := range cw.Watcher.Services {
 				_, err := cw.Watcher.Services[cluster.Name].Next()
 				if err != nil {
@@ -69,16 +70,19 @@ func (cw *ClusterWatcher) updateMetrics() {
 						default:
 							// If status is nil, then we can't say it's an error... it's in an unknown status
 							if stError.Status != nil {
+								glog.Infof("Cluster in error : %s", cluster.Name)
 								errors++
 							}
 						}
 					} else {
 						errors++
+						glog.Infof("Cluster in error : %s", cluster.Name)
 					}
 				} else {
 					started++
 				}
 			}
+			glog.Infof("End metrics update...")
 
 			cw.errorsGauge.Update(errors)
 			cw.passivatedGauge.Update(passivated)
