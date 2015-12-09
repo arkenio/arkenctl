@@ -6,9 +6,10 @@ import (
 	"github.com/coreos/go-etcd/etcd"
 	"github.com/golang/glog"
 	metrics "github.com/rcrowley/go-metrics"
-	datadog "github.com/vistarmedia/go-datadog"
+	datadog "github.com/dmetzler/go-datadog"
 	"os"
 	"time"
+	"fmt"
 )
 
 type ClusterWatcher struct {
@@ -19,7 +20,11 @@ type ClusterWatcher struct {
 
 	inError map[string]*ServiceCluster
 
+
+	dog *datadog.Client
+
 	errorsGauge     metrics.Gauge
+	warningsGauge     metrics.Gauge
 	startedGauge    metrics.Gauge
 	passivatedGauge metrics.Gauge
 }
@@ -30,14 +35,16 @@ func (cw *ClusterWatcher) Watch(stop chan interface{}) error {
 		cw.errorsGauge = metrics.NewGauge()
 		cw.startedGauge = metrics.NewGauge()
 		cw.passivatedGauge = metrics.NewGauge()
+		cw.warningsGauge = metrics.NewGauge()
 
 		metrics.Register("arken.environments.stats.errors", cw.errorsGauge)
 		metrics.Register("arken.environments.stats.started", cw.startedGauge)
 		metrics.Register("arken.environments.stats.passivated", cw.passivatedGauge)
+		metrics.Register("arken.environments.stats.warning", cw.warningsGauge)
 
 		host, _ := os.Hostname()
-		dog := datadog.New(host, cw.DataDogAPIKey)
-		go dog.DefaultReporter().Start(30 * time.Second)
+		cw.dog = datadog.New(host, cw.DataDogAPIKey)
+		go cw.dog.DefaultReporter().Start(30 * time.Second)
 
 	}
 
@@ -57,6 +64,7 @@ func (cw *ClusterWatcher) updateMetrics() {
 			errors := int64(0)
 			passivated := int64(0)
 			started := int64(0)
+			warning := int64(0)
 			glog.Infof("Updating metrics...")
 			for _, cluster := range cw.Watcher.Services {
 				_, err := cw.Watcher.Services[cluster.Name].Next()
@@ -65,6 +73,10 @@ func (cw *ClusterWatcher) updateMetrics() {
 						switch stError.ComputedStatus {
 						case PASSIVATED_STATUS:
 							passivated++
+							break
+						case WARNING_STATUS:
+							warning++
+							break;
 						case STARTING_STATUS, STOPPED_STATUS, STOPPING_STATUS:
 							break
 						default:
@@ -87,6 +99,7 @@ func (cw *ClusterWatcher) updateMetrics() {
 			cw.errorsGauge.Update(errors)
 			cw.passivatedGauge.Update(passivated)
 			cw.startedGauge.Update(started)
+			cw.warningsGauge.Update(warning)
 
 			ticker = time.NewTicker(interval)
 		}
@@ -151,6 +164,15 @@ func (cw *ClusterWatcher) addInError(cluster *ServiceCluster, err error) {
 		glog.Errorf("Cluster %s is still in error, computedStatus : %v", cluster.Name, err)
 	} else {
 		glog.Errorf("Cluster %s is in error : %v ", cluster.Name, err)
+
+		cw.dog.PostEvent(&datadog.Event {
+			Title: fmt.Sprintf("IO instance %s entered error state",cluster.Name),
+			Text:      cw.getClusterDescriptionInMarkdown(cluster),
+			Priority: "normal",
+			Tags      : []string{fmt.Sprintf("ioinstance:%s", cluster.Name),"arkenwatch"},
+			AlertType : "error",
+		})
+
 		cw.inError[cluster.Name] = cluster
 	}
 	var doc bytes.Buffer
@@ -158,9 +180,50 @@ func (cw *ClusterWatcher) addInError(cluster *ServiceCluster, err error) {
 	glog.Errorf(doc.String())
 }
 
+
+func (cw *ClusterWatcher) getClusterDescriptionInMarkdown(cluster *ServiceCluster) string {
+	tpl := `%%%
+{{range $index, $service := .GetInstances }}
+# Instance : {{.Name}}
+
+    * Name : {{.Name}}
+    * UnitName : {{.UnitName }}
+    * Etcd key : {{.NodeKey }}
+    * Domain name : [https://{{.Domain}}/]()
+    * Location : {{.Location.Host}}:{{.Location.Port}}
+    * LastAccess: {{.LastAccess}}
+    * Status: {{.Status.Compute}}
+      * expected : {{.Status.Expected}}
+      * current : {{.Status.Current}}
+      * alive : {{.Status.Alive}}
+{{end}}
+%%%`
+
+	var doc bytes.Buffer
+	renderService(cluster, tpl, &doc)
+	return doc.String()
+}
+
+
+
+
+
+
+
 func (cw *ClusterWatcher) removeInError(cluster *ServiceCluster) {
 	if _, ok := cw.inError[cluster.Name]; ok {
 		glog.Infof("Cluster %s is back to a stable state", cluster.Name)
+
+		cw.dog.PostEvent(&datadog.Event {
+			Title: fmt.Sprintf("IO instance %s recovered from error state",cluster.Name),
+			Text:      cw.getClusterDescriptionInMarkdown(cluster),
+			Priority: "normal",
+			Tags      : []string{fmt.Sprintf("ioinstance:%s", cluster.Name),"arkenwatch"},
+			AlertType : "info",
+		})
+
+
+
 		var doc bytes.Buffer
 		renderService(cluster, "", &doc)
 		glog.Errorf(doc.String())
