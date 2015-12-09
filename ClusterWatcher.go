@@ -6,7 +6,7 @@ import (
 	"github.com/coreos/go-etcd/etcd"
 	"github.com/golang/glog"
 	metrics "github.com/rcrowley/go-metrics"
-	datadog "github.com/dmetzler/go-datadog"
+	datadog "github.com/vistarmedia/go-datadog"
 	"os"
 	"time"
 	"fmt"
