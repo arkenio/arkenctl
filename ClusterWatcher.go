@@ -141,7 +141,7 @@ func (cw *ClusterWatcher) check(cluster *ServiceCluster) error {
 	if err != nil {
 		if stError, ok := err.(StatusError); ok {
 			switch stError.ComputedStatus {
-			case STARTING_STATUS, PASSIVATED_STATUS, STOPPED_STATUS, STOPPING_STATUS:
+			case STARTING_STATUS, PASSIVATED_STATUS, STOPPED_STATUS, STOPPING_STATUS, WARNING_STATUS:
 				break
 			default:
 				// If status is nil, then we can't say it's an error... it's in an unknown status
