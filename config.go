@@ -8,12 +8,12 @@ import (
 )
 
 type Config struct {
-	port          int
-	domainPrefix  string
-	servicePrefix string
-	etcdAddress   string
-	client        *etcd.Client
-	cpuProfile    string
+	port             int
+	domainPrefix     string
+	servicePrefix    string
+	etcdAddress      string
+	client           *etcd.Client
+	cpuProfile       string
 }
 
 func (c *Config) getEtcdClient() (*etcd.Client, error) {

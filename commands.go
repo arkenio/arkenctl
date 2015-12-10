@@ -50,6 +50,16 @@ func GetCommands(stop chan interface{}) []cli.Command {
 					Usage:  "The datadog API key, if set, metrics are sent to datadog",
 					EnvVar: "DD_API_KEY",
 				},
+				cli.IntFlag{
+					Name:   "checkCount",
+					Value:  1,
+					Usage:  "Number of failed check before marking a service to failed",
+				},
+				cli.IntFlag{
+					Name:   "checkGracePeriod",
+					Value:  5,
+					Usage:  "Number of seconds before rechecking a service status",
+				},
 			},
 			Action: func(c *cli.Context) {
 				NewClusterWatcher(c)(stop)
@@ -189,6 +199,8 @@ func NewClusterWatcher(c *cli.Context) Runnable {
 		Client:        client,
 		SingleRun:     c.Bool("single"),
 		DataDogAPIKey: c.String("datadogApiKey"),
+		CheckCount:    c.Int("checkCount"),
+		GracePeriod:   c.Int("checkGracePeriod"),
 	}
 	return cw.Watch
 }

@@ -18,6 +18,11 @@ type ClusterWatcher struct {
 	SingleRun     bool
 	DataDogAPIKey string
 
+	CheckCount    int
+	GracePeriod   int
+
+
+
 	inError map[string]*ServiceCluster
 
 
@@ -137,6 +142,10 @@ func (cw *ClusterWatcher) watchServiceKeys(stop chan interface{}) error {
 }
 
 func (cw *ClusterWatcher) check(cluster *ServiceCluster) error {
+	return cw.check0(cluster,0);
+}
+
+func (cw *ClusterWatcher) check0(cluster *ServiceCluster, checkCount int) error {
 	_, err := cw.Watcher.Services[cluster.Name].Next()
 	if err != nil {
 		if stError, ok := err.(StatusError); ok {
@@ -146,7 +155,14 @@ func (cw *ClusterWatcher) check(cluster *ServiceCluster) error {
 			default:
 				// If status is nil, then we can't say it's an error... it's in an unknown status
 				if stError.Status != nil {
-					cw.addInError(cluster, stError)
+					if(checkCount >= cw.CheckCount) {
+						glog.Infof("Adding in error since checkCount is %d", checkCount)
+						cw.addInError(cluster, stError)
+					} else {
+						glog.Infof("Service seems in error, rechecking in %d seconds", cw.GracePeriod)
+						time.Sleep(time.Duration(cw.GracePeriod) * time.Second)
+						cw.check0(cluster, checkCount + 1)
+					}
 				}
 			}
 		} else {
