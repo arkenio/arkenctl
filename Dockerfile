@@ -1,6 +1,6 @@
 FROM       arken/gom-base
 MAINTAINER Damien Metzler <dmetzler@nuxeo.com>
-RUN echo "avoid cache"
+#RUN echo "avoid cache"
 RUN go get github.com/arkenio/arkenctl
 WORKDIR /usr/local/go/src/github.com/arkenio/arkenctl
 #RUN git checkout v0.3.0
