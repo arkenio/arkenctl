@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	. "github.com/arkenio/goarken"
+	"github.com/arkenio/goarken/drivers"
 	"github.com/codegangsta/cli"
 	"github.com/coreos/go-etcd/etcd"
 	"os"
@@ -14,6 +15,7 @@ import (
 type DomainCommand struct {
 	Watcher *Watcher
 	Client  *etcd.Client
+	ServiceDriver drivers.ServiceDriver
 	Cli     *cli.Context
 }
 
@@ -87,7 +89,7 @@ func (dc *DomainCommand) Start(stop chan interface{}) error {
 	}
 
 	for _, service := range cluster.GetInstances() {
-		err = service.Start(dc.Client)
+		service, err = dc.ServiceDriver.Start(service)
 		if err != nil {
 			break
 		}
@@ -103,7 +105,7 @@ func (dc *DomainCommand) Stop(stop chan interface{}) error {
 	}
 
 	for _, service := range cluster.GetInstances() {
-		err = service.Stop(dc.Client)
+		service, err = dc.ServiceDriver.Stop(service)
 		if err != nil {
 			break
 		}
@@ -118,7 +120,7 @@ func (dc *DomainCommand) Passivate(stop chan interface{}) error {
 	}
 
 	for _, service := range cluster.GetInstances() {
-		err = service.Passivate(dc.Client)
+		service, err = dc.ServiceDriver.Passivate(service)
 		if err != nil {
 			break
 		}

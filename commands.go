@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"github.com/arkenio/goarken"
+	"github.com/arkenio/goarken/drivers"
 	"github.com/codegangsta/cli"
 	"github.com/coreos/go-etcd/etcd"
 )
@@ -30,6 +31,32 @@ func GetGlobalFlags() []cli.Flag {
 		cli.BoolFlag{
 			Name:  "logtostderr",
 			Usage: "log to stderr instead of files",
+		},
+		cli.StringFlag{
+			Name: "driver",
+			Value: "fleet",
+			Usage: "Service driver to use (fleet, rancher)",
+		},
+
+		cli.StringFlag{
+			Name: "rancherEndpoint",
+			EnvVar: "RANCHER_ENDPOINT",
+			Value: "",
+			Usage: "Rancher endpoint on which to send commands",
+		},
+
+		cli.StringFlag{
+			Name: "rancherAccessKey",
+			EnvVar: "RANCHER_ACCESSKEY",
+			Value: "",
+			Usage: "The access key to use to connect to Rancher",
+		},
+
+		cli.StringFlag{
+			Name: "rancherSecretKey",
+			EnvVar: "RANCHER_SECRETKEY",
+			Value: "",
+			Usage: "The secret key to use to connect to Rancher",
 		},
 	}
 
@@ -178,6 +205,17 @@ func CreateEtcdClientFromCli(c *cli.Context) *etcd.Client {
 	return etcd.NewClient([]string{c.GlobalString("etcdAddress")})
 }
 
+func CreateServiceDriverFromCli(c *cli.Context, etcdClient *etcd.Client ) drivers.ServiceDriver {
+	switch c.GlobalString("driver") {
+	case "rancher":
+		return drivers.NewRancherServiceDriver(etcdClient,
+			c.GlobalString("rancherHost"),c.GlobalString("rancherAccessKey"),c.GlobalString("rancherSecretKey"))
+
+	default:
+		return drivers.NewFleetServiceDriver(etcdClient)
+	}
+}
+
 func CreateWatcherFromCli(c *cli.Context, client *etcd.Client) *goarken.Watcher {
 	w := &goarken.Watcher{
 		Client:        client,
@@ -216,8 +254,11 @@ func CreateServiceCommand(c *cli.Context) *ServiceCommand {
 	goarken.SetDomainPrefix(c.GlobalString("domainDir"))
 	goarken.SetServicePrefix(c.GlobalString("serviceDir"))
 
+	etcdClient := CreateEtcdClientFromCli(c)
+
 	return &ServiceCommand{
-		Client: CreateEtcdClientFromCli(c),
+		Client: etcdClient,
+		Driver: CreateServiceDriverFromCli(c, etcdClient),
 		Cli:    c,
 	}
 
